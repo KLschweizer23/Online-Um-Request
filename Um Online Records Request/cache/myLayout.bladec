@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+ <head>
+
+ <meta charset="utf-8">
+	  	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+ <link type="text/css" rel="stylesheet" href="./css/myBootstrap.css">
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> 
+ <title>Home page</title>
+
+ </head>
+
+ <body class="bg-um">
+ <div class="container-fluid m-0 p-0">
+ <div class="container-fluid text-red-um">
+ <h1>Welcome</h1>
+ </div>
+ <main class="py-4">
+ <?php echo $this->yieldContent('myContent'); ?>
+ </main>
+ </div>
+ </body>
+
+</html>

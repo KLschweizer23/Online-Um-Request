@@ -1,0 +1,194 @@
+<?php if(empty(session_id())){session_start();} ?>
+<!DOCTYPE html>
+<html>
+
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+
+ <link type="text/css" rel="stylesheet" href="./css/myBootstrap.css">
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+ <script type="text/javascript" src="popper.min.js"></script>
+
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <script type="text/javascript" src="jquery.min.js"></script>
+
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="bootstrap.min.js"></script>
+
+ <link rel="stylesheet" href="assets/vendor/animate.css/animate.min.css">
+ <script src="assets/vendor/bootstrap-notify/bootstrap-notify.min.js"></script>
+
+ <?php 
+ include_once "DataManager/SessionController.php";
+ include_once "DataManager/DatabaseController.php";
+ include_once "DataManager/DatabaseManager/Database/Connection/DatabaseConfiguration.php";
+ include_once "DataManager/InputController.php";
+ include_once "DataManager/LoginController.php";
+ include_once "DataManager/DataController.php";
+
+ use DataManager\SessionManager\Session;
+ use DataManager\DatabaseManager\DB;
+ use DataManager\DatabaseManager\Connection\classes;
+ use DataManager\InputManager\Data;
+ use DataManager\LoginManager\Log;
+ use DataManager\DataController\DataControl;
+ ?>
+ 
+ <?php 
+ if(isset($_POST["submit"]))
+ {
+ Session::clear();
+ header('Location: ./Home.php');
+ }
+ ?>
+ <?php 
+ if(isset($_POST['admin'])){Session::set('role', 'Admin'); header('Location: ./Register.php');}
+ elseif(isset($_POST['student'])){Session::set('role', 'Student'); header('Location: ./Register.php');}
+ elseif(isset($_POST['alumni'])){Session::set('role', 'Alumni'); header('Location: ./Register.php');}
+ ?>
+ 
+ <?php 
+ if(isset($_POST['Register']))
+ {
+ $allValues = [];
+ $varNames = Data::get()->all();
+ foreach($varNames as $varName)
+ {
+ if($varName != 'ID' && !str_contains($varName, '_ID'))
+ array_push($allValues, $_POST[$varName]);
+ elseif(str_contains($varName, '_ID'))
+ array_push($allValues, $_POST['_ID']);
+ }
+ $result = DB::do()->insert(Session::get('role'))
+ ->values($allValues)
+ ->endInsert();
+ if($result == '1') header('Location: ./Login.php');
+ else echo $result;
+ }
+ ?>
+ <?php 
+ if(isset($_POST['login']))
+ {
+ $id = $_POST['_ID'];
+ $password = $_POST['PASSWORD'];
+
+ $info = Log::checkThis($id, $password);
+ if(empty($info))
+ {
+ Session::set('key','id');
+ Session::set('old', $id);
+ header('Location: ./Login.php');
+ }
+ else
+ {
+ Log::setRole($info[0])->setAllSession($info[1]);
+ header('Location: ./Dashboard.php');
+ }
+ }
+ ?>
+
+ <?php
+ if (isset($_POST['add'])) {
+ echo DataControl::data()
+ ->set($_POST['Record'], date("Y-m-d")) . ' - here';
+ header('Location:./Dashboard.php');
+ } 
+ if (isset($_POST['minus'])) {
+ $data = "";
+ $data = empty($data) ? null : substr($_POST['ID'], -1, 1);
+ echo DataControl::data()
+ ->delete($data);
+ header('Location:./Dashboard.php');
+ }
+ if (isset($_POST['Accept'])) {
+ echo $_POST['MY_ID'] . " ---- ";
+ echo $id = 2;
+ echo $pick = $_POST['PICKUP'];
+ echo $status = 'Accept';
+
+ echo DataControl::data()
+ ->update($id, $pick, $status);
+ }
+ if (isset($_POST['Deny'])) {
+ echo $id = 3;
+ echo $pick = 'N/A';
+ echo $status = 'Deny';
+
+ echo DataControl::data()
+ ->update($id, $pick, $status);
+ header('Location:./Dashboard.php');
+ }
+ if (isset($_POST['Claimed'])) {
+
+ echo $id = 4;
+ echo $pick = 'Done';
+ echo $status = 'Claimed';
+
+ $return = DataControl::data()
+ ->update($id, $pick, $status);
+ }
+ ?>
+
+</head>
+
+<body class="bg-um <?php echo \htmlentities($setBackground, ENT_QUOTES, 'UTF-8', false); ?> p-0 m-0">
+ <div class="container-fluid m-0 p-0">
+ <nav class="navbar navbar-expand p-0 fixed-top navbar-dark bg-um-inverted nav-shadow">
+ <div class="container-fluid">
+ <div class="collapse navbar-collapse" id="collapsibleNavbar">
+ <ul class="nav navbar-nav p-0 w-0">
+ <li class="nav-item">
+ <a class="nav-link text-light p-4 text-white" href="Home.php">Home</a>
+ </li>
+ <?php if(!isset($this->currentUser)): ?>
+ <?php else: ?>
+ <li class="nav-item">
+ <a class="nav-link text-light p-4 text-white" href="Dashboard.php">
+ <span>Dashboard</span>
+ </a>
+ </li>
+ <?php endif; ?>
+ </ul>
+ </div>
+ <?php if(!isset($this->currentUser)): ?>
+ <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavbar">
+ <ul class="nav navbar-nav p-0 w-0">
+ <li class="nav-item">
+ <a class="nav-link text-light p-4 text-white" href="Login.php">Login</a>
+ </li>
+ <li class="nav-item">
+ <a class="nav-link text-light p-4 text-white" href="Option.php">Register</a>
+ </li>
+ </ul>
+ </div>
+ <?php else: ?>
+ <ul class="nav navbar-nav p-0 w-0">
+ <li class="nav-item dropdown">
+ <a class="nav-link dropdown-toggle text-light p-4 text-white" href="#" id="navbardrop" data-toggle="dropdown">
+ <?php echo \htmlentities($blade->getCurrentUser(), ENT_QUOTES, 'UTF-8', false); ?>
+
+ </a>
+ <div class="dropdown-menu">
+ <form method="POST">
+ <button class="dropdown-item" type="submit" name="submit">
+ Logout
+ </button>
+ </form>
+ </div>
+ </li>
+ </ul>
+ <?php endif; ?>
+ </div>
+ </nav>
+
+ <main class="py-4 mt-5">
+ <?php echo $this->yieldContent('myContent'); ?>
+ </main>
+
+ </div>
+</body>
+
+</html>
